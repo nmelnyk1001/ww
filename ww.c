@@ -11,49 +11,12 @@
 #include "strbuf.h"
 
 // Global variables for find_token
-int isSpace = 0;
-int printedSpace = 0;
 int isNewLine = 0;
 int EndOfFile = 0;
 
 void exit_error(char *reason){
     perror(reason);
     exit(EXIT_FAILURE);
-}
-
-int check_whitespace(int out){
-    // Check what the last whitespace character was
-    int res = 0;
-    char *space = " ";
-    char *newLine = "\n";
-
-    if (isSpace && !printedSpace){
-        res = write(out, space, 1);
-        if (res < 0)
-            exit_error("Write error.\n");
-        // reset isSpace
-        isSpace = 0;
-        printedSpace = 1;
-        return 1;
-    }
-    else if (isNewLine == 1){
-        res = write(out, space, 1);
-        if (res < 0)
-            exit_error("Write error.\n");
-        printedSpace = 1;
-        return 1;
-    }
-    else if (isNewLine == 2){
-        res = write(out, newLine, 1);
-        if (res < 0)
-            exit_error("Write error.\n");
-        // reset newLine
-        isNewLine = 0;
-        return 0;
-    }
-    else{
-        return 0;
-    }
 }
 
 int find_token(int width, int fd, strbuf_t *tok){
@@ -64,17 +27,12 @@ int find_token(int width, int fd, strbuf_t *tok){
 
     // Static variables for later
     char *newLine = "\n";
-    char *space = " ";
     // Begin reading through doc
     while (read(fd, buf, sizeof(char)) > 0){
         // The only whitespace that matters is newline, everything else ends the word
         if (isspace(*buf)){
             if (strcmp(buf, newLine) == 0){
                 isNewLine++;
-                return EXIT_SUCCESS;
-            }
-            else if (strcmp(buf, space) == 0){
-                isSpace = 1;
                 return EXIT_SUCCESS;
             }
             else{
@@ -85,16 +43,13 @@ int find_token(int width, int fd, strbuf_t *tok){
             // Append the char to the strbuf
             sb_append(tok, *buf);
             // Reset both flags to false
-            isSpace = 0;
             isNewLine = 0;
-            printedSpace = 0;
         }
     }
 
     // Check length of buffer
     if (tok->length > 0){
         // Reset flags to false
-        isSpace = 0;
         isNewLine = 0;
     }
 
@@ -110,6 +65,7 @@ int read_file(int width, int fd, int fd_out){
     sb_init(&tok, width);
     // Static variables for convenience 
     char *newLine = "\n";
+    char *space = " ";
     int out = fd_out > 0 ? fd_out : 1;
     // Parse through the words in the input
     while(find_token(width, fd, &tok) != EXIT_FAILURE){
@@ -150,8 +106,32 @@ int read_file(int width, int fd, int fd_out){
             // Update pos
             pos += tok.used;
         }
+        // Check for paragraph break
+        if (isNewLine == 2){
+            int res = write(out, newLine, 1);
+            if (res < 0)
+                exit_error("Write error.\n");
+            pos = 0;
+            isNewLine = 0;
+        }
+        // Print a space after word
+        if (pos + 1 >= width){
+            // Print newline instead
+            int res = write(out, newLine, 1);
+            if (res < 0)
+                exit_error("Write error.\n");
+            pos = 0;
+        }
+        else{
+            if (tok.used > 0){
+                int res = write(out, space, 1);
+                if (res < 0)
+                    exit_error("Write error.\n");
+                pos++;
+            }
+        }
+
         // Reset the buffer
-        pos += check_whitespace(out);
         tok.length = width;
         tok.used = 0;
     }
