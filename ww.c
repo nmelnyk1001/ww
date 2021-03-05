@@ -103,7 +103,7 @@ int read_file(int width, int fd, int fd_out){
             pos += tok.used;
         }
         // Check for paragraph break
-        if (isNewLine == 2 && paragraphBreakPrinted){
+        if (isNewLine == 2 && paragraphBreakPrinted && pos != 0){
             int res = write(out, newLine, 1);
             if (res < 0)
                 exit_error("Write error.\n");
