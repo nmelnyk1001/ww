@@ -12,6 +12,7 @@
 
 // Global variables for find_token
 int isNewLine = 0;
+int paragraphBreakPrinted = 1;
 int EndOfFile = 0;
 
 void exit_error(char *reason){
@@ -44,13 +45,8 @@ int find_token(int width, int fd, strbuf_t *tok){
             sb_append(tok, *buf);
             // Reset both flags to false
             isNewLine = 0;
+            paragraphBreakPrinted = 1;
         }
-    }
-
-    // Check length of buffer
-    if (tok->length > 0){
-        // Reset flags to false
-        isNewLine = 0;
     }
 
     // If reaching here EOF
@@ -107,11 +103,15 @@ int read_file(int width, int fd, int fd_out){
             pos += tok.used;
         }
         // Check for paragraph break
-        if (isNewLine == 2){
+        if (isNewLine == 2 && paragraphBreakPrinted){
             int res = write(out, newLine, 1);
             if (res < 0)
                 exit_error("Write error.\n");
+            res = write(out, newLine, 1);
+            if (res < 0)
+                exit_error("Write error.\n");
             pos = 0;
+            paragraphBreakPrinted = 0;
             isNewLine = 0;
         }
         // Print a space after word
