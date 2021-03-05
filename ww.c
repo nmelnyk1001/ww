@@ -155,7 +155,7 @@ int ww(int width, char *file, int fd_out){
 }
 
 int ww_dir(int width, char *directory){
-    DIR *dirp = opendir("."); // open the current directory
+    DIR *dirp = opendir(directory); // open the current directory
     // If dirp is null error
     if (dirp == NULL)
         exit_error("Failed to open directory.\n");
@@ -168,7 +168,6 @@ int ww_dir(int width, char *directory){
 
     // Iterate over everything in the directory
     while ((de = readdir(dirp))){
-        struct stat *statbuf = NULL;
         // create filepath for the file
         char *wrap = "wrap.";
         strcat(file_name, directory);
@@ -177,22 +176,33 @@ int ww_dir(int width, char *directory){
         strcat(file_out, wrap);
         strcat(file_out, de->d_name);
 
-        if (stat(file_name, statbuf) != 0)
-            exit(EXIT_FAILURE);
+        // if d_type == 4, it's a directory, skip
+        if (de->d_type == 4){
+            // Reset the file_name string
+            memset(file_name, '\0', 256 * sizeof(char));
+            memset(file_out, '\0', 256 * sizeof(char));
+            continue;
+        }
 
-        if (S_ISREG(statbuf->st_mode)){
+        // if d_type == 8, it's a file
+        if (de->d_type == 8){
             // use file
-            if (ww(width, file_name, 1) == EXIT_FAILURE)
+            int fd_out = open(file_out, O_WRONLY | O_CREAT);
+            if (fd_out == -1)
+                exit_error("Out file failed to open.\n");
+            if (ww(width, file_name, fd_out) == EXIT_FAILURE)
                 exit(EXIT_FAILURE);
         }
         // Reset the file_name string
         memset(file_name, '\0', 256*sizeof(char));
-        memset(file_name, '\0', 256*sizeof(char));
+        memset(file_out, '\0', 256*sizeof(char));
     }
 
     if (closedir(dirp) < 0)
         exit_error("Failed to close directory.\n");
 
+    free(file_name);
+    free(file_out);
     return EXIT_SUCCESS;
 }
 

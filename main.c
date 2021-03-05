@@ -41,7 +41,8 @@ int main(int argc, char **argv){
         }
         else if (S_ISDIR(statbuf.st_mode)){
             // Handle directories
-            if (ww_dir(atoi(argv[1]), argv[2]) == EXIT_FAILURE)
+            int width = atoi(argv[1]);
+            if (ww_dir(width, argv[2]) == EXIT_FAILURE)
                 return EXIT_FAILURE;
         }
         else{
