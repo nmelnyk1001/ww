@@ -26,17 +26,17 @@ int find_token(int width, int fd, strbuf_t *tok){
         exit_error("Malloc failed to aquire space.\n");
     }
 
-    // Static variables for later
-    char *newLine = "\n";
     // Begin reading through doc
     while (read(fd, buf, sizeof(char)) > 0){
         // The only whitespace that matters is newline, everything else ends the word
         if (isspace(*buf)){
-            if (strcmp(buf, newLine) == 0){
+            if (*buf == '\n'){
                 isNewLine++;
+                free(buf);
                 return EXIT_SUCCESS;
             }
             else{
+                free(buf);
                 return EXIT_SUCCESS;
             }
         }
@@ -51,6 +51,7 @@ int find_token(int width, int fd, strbuf_t *tok){
 
     // If reaching here EOF
     EndOfFile = 1;
+    free(buf);
     return EXIT_SUCCESS;
 }
 
