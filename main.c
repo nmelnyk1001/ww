@@ -13,7 +13,7 @@ int main(int argc, char **argv){
     }
 
     // Check page width (arg 1) is a positive number
-    if (atoi(argv[1]) < 0){
+    if (atoi(argv[1]) <= 0){
         perror("Argument 1 must be a positive integer.\n");
         return EXIT_FAILURE;
     }

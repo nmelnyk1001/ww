@@ -170,11 +170,26 @@ int ww_dir(int width, char *directory){
     while ((de = readdir(dirp))){
         // create filepath for the file
         char *wrap = "wrap.";
+        char *name = de->d_name;
         strcat(file_name, directory);
-        strcat(file_name, de->d_name);
-        strcat(file_out, directory);
-        strcat(file_out, wrap);
-        strcat(file_out, de->d_name);
+        strcat(file_name, name);
+        int res = 1;
+        // Check if file starts with "wrap."
+        for (int i = 0;i<5;i++){
+            if (*(wrap + i) != *(name+i)){
+                res = 0;
+                break;
+            }
+        }
+        if (res == 1){
+            strcat(file_out, directory);
+            strcat(file_out, name);
+        }
+        else{
+            strcat(file_out, directory);
+            strcat(file_out, wrap);
+            strcat(file_out, name);
+        }
 
         // if d_type == 4, it's a directory, skip
         if (de->d_type == 4){
