@@ -23,7 +23,7 @@ void sb_destroy(strbuf_t *list){
 }
 
 void sb_reset(strbuf_t *list, size_t length){
-    list->length = length;
+    list->length = 0;
     list->used = 0;
     list->data = realloc(list->data, sizeof(char) * length);
     memset(list->data, '\0', length);

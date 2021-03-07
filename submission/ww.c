@@ -202,7 +202,7 @@ int ww_dir(int width, char *directory){
         // if d_type == 8, it's a file
         if (de->d_type == 8){
             // use file
-            int fd_out = open(file_out, O_WRONLY | O_CREAT);
+            int fd_out = open(file_out, O_WRONLY | O_CREAT, 0666);
             if (fd_out == -1)
                 exit_error("Out file failed to open.\n");
             if (ww(width, file_name, fd_out) == EXIT_FAILURE)
