@@ -20,4 +20,4 @@ Testing Strategy:
     - Checked input with tabs and other non space, non newline whitespace characters
     - Checked input with subdirectories 
     - Checked input with no files within subdirectory
-    x Checked input with files already created within the directory
+    - Checked input with files already created within the directory
